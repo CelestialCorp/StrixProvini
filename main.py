@@ -164,6 +164,23 @@ async def appuntamenti(interaction: discord.Interaction, aggiungi: str = None, r
     embed.set_footer(text="Usa /appuntamenti aggiungi:<nome> o rimuovi:<nome>")
     await interaction.response.send_message(embed=embed)
 
+# Comando /aiuto
+@bot.tree.command(name="aiuto", description="Mostra tutti i comandi disponibili del bot.")
+async def aiuto(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="🤖 Comandi disponibili",
+        description="Ecco l'elenco dei comandi che puoi usare:",
+        color=discord.Color.blue()
+    )
+    embed.add_field(name="/membri", value="Mostra tutti i membri del team STRIX.", inline=False)
+    embed.add_field(name="/voto_media", value="Valuta un utente per il provino (da 1 a 10 per ogni abilità).", inline=False)
+    embed.add_field(name="/data", value="Programma un provino per un utente.", inline=False)
+    embed.add_field(name="/provini", value="Mostra lo stato dei provini per i membri con un ruolo specifico.", inline=False)
+    embed.add_field(name="/appuntamenti", value="Gestisci la lista dei provini (aggiungi, rimuovi, visualizza).", inline=False)
+    embed.set_footer(text="Creato da @gatto_six")
+    
+    await interaction.response.send_message(embed=embed)
+
 # Evento per messaggi
 @bot.event
 async def on_message(message):

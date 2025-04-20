@@ -4,6 +4,19 @@ from keep_alive import keep_alive
 import discord
 from discord.ext import commands
 from discord import app_commands
+import json
+
+PROVINI_FILE = "provini.json"
+
+def carica_provini():
+    if not os.path.exists(PROVINI_FILE):
+        return {"in_attesa": []}
+    with open(PROVINI_FILE, "r") as f:
+        return json.load(f)
+
+def salva_provini(data):
+    with open(PROVINI_FILE, "w") as f:
+        json.dump(data, f, indent=4)
 
 # Carica le variabili d'ambiente dal file .env
 load_dotenv()
@@ -111,6 +124,45 @@ async def provini(interaction: discord.Interaction):
         "\n\nPer i membri con (X), fissare un provino al più presto!"
     )
     await interaction.response.send_message(response)
+
+# Comando /appuntamenti
+@bot.tree.command(name="appuntamenti", description="Gestisci la lista dei provini (aggiungi, rimuovi, visualizza).")
+@app_commands.describe(aggiungi="(Opzionale) Nome da aggiungere", rimuovi="(Opzionale) Nome da rimuovere")
+async def appuntamenti(interaction: discord.Interaction, aggiungi: str = None, rimuovi: str = None):
+    data = carica_provini()
+
+    if aggiungi:
+        if aggiungi in data["in_attesa"]:
+            await interaction.response.send_message(f"⚠️ `{aggiungi}` è già nella lista.", ephemeral=True)
+        else:
+            data["in_attesa"].append(aggiungi)
+            salva_provini(data)
+            await interaction.response.send_message(f"✅ `{aggiungi}` è stato aggiunto alla lista dei provini.")
+        return
+
+    if rimuovi:
+        if rimuovi in data["in_attesa"]:
+            data["in_attesa"].remove(rimuovi)
+            salva_provini(data)
+            await interaction.response.send_message(f"✅ `{rimuovi}` rimosso dalla lista dei provini.")
+        else:
+            await interaction.response.send_message(f"⚠️ `{rimuovi}` non è nella lista.", ephemeral=True)
+        return
+
+    # Se non viene fornito né aggiungi né rimuovi, mostra la lista
+    in_attesa = data["in_attesa"]
+    if not in_attesa:
+        await interaction.response.send_message("🎉 Nessun membro in attesa di provino!", ephemeral=True)
+        return
+
+    lista = "\n".join(f"- {nome}" for nome in in_attesa)
+    embed = discord.Embed(
+        title="📅 Membri in attesa di provino",
+        description=f"**Lista:**\n{lista}",
+        color=discord.Color.orange()
+    )
+    embed.set_footer(text="Usa /appuntamenti aggiungi:<nome> o rimuovi:<nome>")
+    await interaction.response.send_message(embed=embed)
 
 # Evento per messaggi
 @bot.event

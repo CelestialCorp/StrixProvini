@@ -1,13 +1,18 @@
 import os
+import json
+from datetime import datetime
 from dotenv import load_dotenv
 from keep_alive import keep_alive
 import discord
 from discord.ext import commands
 from discord import app_commands
-import json
 
+# Costanti
 PROVINI_FILE = "provini.json"
+ROLE_MEMBRI_ID = 1213221604436217887
+ROLE_PROVINI_ID = 1276989508679634954
 
+# Caricamento e salvataggio JSON
 def carica_provini():
     if not os.path.exists(PROVINI_FILE):
         return {"in_attesa": []}
@@ -18,170 +23,166 @@ def salva_provini(data):
     with open(PROVINI_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-# Carica le variabili d'ambiente dal file .env
+# Setup ambiente e server
 load_dotenv()
-
-# Avvia il server Flask per mantenere vivo il bot
 keep_alive()
 
-# Configurazione del bot
+# Bot setup
 intents = discord.Intents.default()
 intents.message_content = True
-intents.members = True  # Necessario per ottenere tutti i membri del server
+intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+# Variabile globale per i provini
+provini_in_attesa = carica_provini()["in_attesa"]
+
 @bot.event
 async def on_ready():
-    print(f"{bot.user} è online e pronto!")
+    print(f"{bot.user} è online!")
     activity = discord.Activity(type=discord.ActivityType.watching, name="Provini su STRIX!")
     await bot.change_presence(activity=activity)
     try:
         synced = await bot.tree.sync()
         print(f"Sincronizzati {len(synced)} comandi slash.")
     except Exception as e:
-        print(f"Errore durante la sincronizzazione dei comandi: {e}")
+        print(f"Errore durante la sincronizzazione: {e}")
 
-# Comando /membri
+# ---------------- COMANDI ---------------- #
+
 @bot.tree.command(name="membri", description="Mostra tutti i membri del team STRIX!")
 async def membri(interaction: discord.Interaction):
-    role_id = 1213221604436217887  # ID del ruolo
-    guild = interaction.guild
-
-    # Trova il ruolo tramite il suo ID
-    role = discord.utils.get(guild.roles, id=role_id)
+    role = discord.utils.get(interaction.guild.roles, id=ROLE_MEMBRI_ID)
 
     if not role:
-        await interaction.response.send_message(f"Il ruolo con ID `{role_id}` non è stato trovato nel server.", ephemeral=True)
+        await interaction.response.send_message(f"Ruolo con ID `{ROLE_MEMBRI_ID}` non trovato.", ephemeral=True)
         return
 
-    members_with_role = [member for member in guild.members if role in member.roles]
+    membri = [member.mention for member in interaction.guild.members if role in member.roles]
+    if not membri:
+        await interaction.response.send_message("Nessun membro con questo ruolo al momento.", ephemeral=True)
+    else:
+        await interaction.response.send_message(
+            f"👥 Membri del team STRIX `{role.name}`:\n" + "\n".join(membri)
+        )
 
-    if not members_with_role:
-        await interaction.response.send_message("Nessun membro ha questo ruolo al momento.", ephemeral=True)
-        return
-
-    membri_elenco = [member.mention for member in members_with_role]
-    response = f"Membri del team STRIX `{role.name}`:\n\n" + "\n".join(membri_elenco)
-    await interaction.response.send_message(response)
-
-# Comando /voto_media
-@bot.tree.command(name="voto_media", description="Valuta un utente per il provino (1-10 per ogni abilità).")
+@bot.tree.command(name="voto_media", description="Valuta un utente per il provino (1-10 per abilità).")
 async def voto_media(interaction: discord.Interaction, nome_utente: str, voto_mira: int, voto_edit: int, voto_freebuild: int, voto_partita: int, voto_facoltativo: int = 0):
     voti = [voto_mira, voto_edit, voto_freebuild, voto_partita]
     if voto_facoltativo > 0:
         voti.append(voto_facoltativo)
 
     if not all(1 <= voto <= 10 for voto in voti):
-        await interaction.response.send_message("I voti devono essere tra 1 e 10. Inserisci valori validi.", ephemeral=True)
+        await interaction.response.send_message("⚠️ I voti devono essere tra 1 e 10.", ephemeral=True)
         return
 
-    media_voti = round(sum(voti) / len(voti))
-    if media_voti >= 5:
-        messaggio = f"{nome_utente}, benvenuto ufficialmente nel team con voto: {media_voti}!"
+    media = round(sum(voti) / len(voti))
+    if media >= 5:
+        msg = f"✅ {nome_utente}, benvenuto ufficialmente nel team con voto: **{media}**!"
     else:
-        messaggio = f"{nome_utente}, non hai superato il provino con voto: {media_voti}, ma fai comunque parte del team!"
-    await interaction.response.send_message(messaggio)
+        msg = f"❌ {nome_utente}, non hai superato il provino (voto: **{media}**), ma fai comunque parte del team!"
+    await interaction.response.send_message(msg)
 
-# Comando /data
 @bot.tree.command(name="data", description="Programma un provino per un utente.")
 async def data(interaction: discord.Interaction, nome_utente: str, orario: str, data: str):
-    messaggio_finale = (
-        f"Ciao {nome_utente}!\n"
-        f"Il tuo provino è programmato per il **{data}** alle **{orario}**.\n\n"
-        "⚡ Dettagli:\n"
-        "- Modalità: Creativa e Battaglia Reale/Ranked\n"
-        "- Durata: Circa 40 minuti\n\n"
-        "Non perdere l’occasione, potresti essere il prossimo player del nostro team!"
-    )
-    await interaction.response.send_message(messaggio_finale)
+    try:
+        datetime.strptime(data, "%d/%m/%Y")
+        datetime.strptime(orario, "%H:%M")
+    except ValueError:
+        await interaction.response.send_message("📅 Formato errato. Usa DD/MM/YYYY e HH:MM.", ephemeral=True)
+        return
 
-# Comando /provini
-@bot.tree.command(name="provini", description="Mostra lo stato dei provini per i membri con un ruolo specifico.")
+    msg = (
+        f"📆 **Ciao {nome_utente}!**\n"
+        f"Il tuo provino è programmato per il **{data}** alle **{orario}**.\n\n"
+        "**Dettagli:**\n- Modalità: Creativa & Battaglia Reale\n- Durata: ~40 min\n\n"
+        "✨ Potresti essere il prossimo player STRIX!"
+    )
+    await interaction.response.send_message(msg)
+
+    if nome_utente not in provini_in_attesa:
+        provini_in_attesa.append(nome_utente)
+        salva_provini({"in_attesa": provini_in_attesa})
+        await interaction.channel.send(f"✅ {nome_utente} aggiunto alla lista dei provini.")
+    else:
+        await interaction.channel.send(f"⚠️ {nome_utente} è già in lista.")
+
+@bot.tree.command(name="provini", description="Mostra lo stato dei provini.")
 async def provini(interaction: discord.Interaction):
-    role_id = 1276989508679634954  # ID del ruolo
-    guild = interaction.guild
-    role = discord.utils.get(guild.roles, id=role_id)
+    role = discord.utils.get(interaction.guild.roles, id=ROLE_PROVINI_ID)
 
     if not role:
-        await interaction.response.send_message(f"Il ruolo con ID `{role_id}` non è stato trovato nel server.", ephemeral=True)
+        await interaction.response.send_message(f"Ruolo con ID `{ROLE_PROVINI_ID}` non trovato.", ephemeral=True)
         return
 
-    members_with_role = [member for member in guild.members if role in member.roles]
+    members = [member for member in interaction.guild.members if role in member.roles]
+    verified = [f"{m.mention} = ✔" for m in members if "completato" in m.display_name.lower()]
+    not_verified = [f"{m.mention} = X" for m in members if "completato" not in m.display_name.lower()]
 
-    if not members_with_role:
-        await interaction.response.send_message("Nessun membro ha questo ruolo al momento.", ephemeral=True)
-        return
-
-    verified = [f"{member.mention} = ✔" for member in members_with_role if "completato" in member.display_name.lower()]
-    not_verified = [f"{member.mention} = X" for member in members_with_role if "completato" not in member.display_name.lower()]
-
-    response = (
-        "Membri che devono fare provino e non:\n"
-        "✔ = Membri verificati\n"
-        "X = Membri ancora non verificati\n\n"
-        + "\n".join(verified + not_verified) +
-        "\n\nPer i membri con (X), fissare un provino al più presto!"
+    risposta = (
+        "**📋 Stato Provini:**\n"
+        "✔ = Completato\n"
+        "X = Da fare\n\n"
+        + "\n".join(verified + not_verified)
     )
-    await interaction.response.send_message(response)
+    await interaction.response.send_message(risposta)
 
-# Comando /appuntamenti
-@bot.tree.command(name="appuntamenti", description="Gestisci la lista dei provini (aggiungi, rimuovi, visualizza).")
-@app_commands.describe(aggiungi="(Opzionale) Nome da aggiungere", rimuovi="(Opzionale) Nome da rimuovere")
+@bot.tree.command(name="appuntamenti", description="Gestisci la lista dei provini.")
+@app_commands.describe(aggiungi="Nome da aggiungere", rimuovi="Nome da rimuovere")
 async def appuntamenti(interaction: discord.Interaction, aggiungi: str = None, rimuovi: str = None):
     data = carica_provini()
 
     if aggiungi:
         if aggiungi in data["in_attesa"]:
-            await interaction.response.send_message(f"⚠️ `{aggiungi}` è già nella lista.", ephemeral=True)
+            await interaction.response.send_message(f"⚠️ `{aggiungi}` è già in lista.", ephemeral=True)
         else:
             data["in_attesa"].append(aggiungi)
             salva_provini(data)
-            await interaction.response.send_message(f"✅ `{aggiungi}` è stato aggiunto alla lista dei provini.")
+            await interaction.response.send_message(f"✅ `{aggiungi}` aggiunto alla lista.")
         return
 
     if rimuovi:
         if rimuovi in data["in_attesa"]:
             data["in_attesa"].remove(rimuovi)
             salva_provini(data)
-            await interaction.response.send_message(f"✅ `{rimuovi}` rimosso dalla lista dei provini.")
+            await interaction.response.send_message(f"✅ `{rimuovi}` rimosso dalla lista.")
         else:
-            await interaction.response.send_message(f"⚠️ `{rimuovi}` non è nella lista.", ephemeral=True)
+            await interaction.response.send_message(f"⚠️ `{rimuovi}` non trovato nella lista.", ephemeral=True)
         return
 
-    # Se non viene fornito né aggiungi né rimuovi, mostra la lista
-    in_attesa = data["in_attesa"]
-    if not in_attesa:
-        await interaction.response.send_message("🎉 Nessun membro in attesa di provino!", ephemeral=True)
-        return
+    lista = data["in_attesa"]
+    if not lista:
+        await interaction.response.send_message("🎉 Nessun membro in attesa!", ephemeral=True)
+    else:
+        embed = discord.Embed(
+            title="📅 Membri in attesa di provino",
+            description="\n".join(f"- {nome}" for nome in lista),
+            color=discord.Color.orange()
+        )
+        embed.set_footer(text="Usa /appuntamenti per gestire la lista.")
+        await interaction.response.send_message(embed=embed)
 
-    lista = "\n".join(f"- {nome}" for nome in in_attesa)
-    embed = discord.Embed(
-        title="📅 Membri in attesa di provino",
-        description=f"**Lista:**\n{lista}",
-        color=discord.Color.orange()
-    )
-    embed.set_footer(text="Usa /appuntamenti aggiungi:<nome> o rimuovi:<nome>")
-    await interaction.response.send_message(embed=embed)
-
-# Comando /aiuto
-@bot.tree.command(name="aiuto", description="Mostra tutti i comandi disponibili del bot.")
+@bot.tree.command(name="aiuto", description="Mostra tutti i comandi disponibili.")
 async def aiuto(interaction: discord.Interaction):
     embed = discord.Embed(
         title="🤖 Comandi disponibili",
-        description="Ecco l'elenco dei comandi che puoi usare:",
+        description="Ecco i comandi che puoi usare con il bot STRIX:",
         color=discord.Color.blue()
     )
-    embed.add_field(name="/membri", value="Mostra tutti i membri del team STRIX.", inline=False)
-    embed.add_field(name="/voto_media", value="Valuta un utente per il provino (da 1 a 10 per ogni abilità).", inline=False)
-    embed.add_field(name="/data", value="Programma un provino per un utente.", inline=False)
-    embed.add_field(name="/provini", value="Mostra lo stato dei provini per i membri con un ruolo specifico.", inline=False)
-    embed.add_field(name="/appuntamenti", value="Gestisci la lista dei provini (aggiungi, rimuovi, visualizza).", inline=False)
-    embed.set_footer(text="Creato da @gatto_six")
-    
+    comandi = {
+        "/membri": "Mostra i membri del team STRIX",
+        "/voto_media": "Valuta un utente per il provino",
+        "/data": "Programma un provino",
+        "/provini": "Mostra lo stato dei provini",
+        "/appuntamenti": "Gestisci la lista dei provini",
+    }
+    for nome, desc in comandi.items():
+        embed.add_field(name=nome, value=desc, inline=False)
+    embed.set_footer(text="Contattaci per supporto!")
     await interaction.response.send_message(embed=embed)
 
-# Evento per messaggi
+# ---------------- EVENTO MESSAGGI ---------------- #
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -203,5 +204,5 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-# Avvia il bot
-bot.run(os.getenv('DISCORD_TOKEN'))
+# Avvio del bot
+bot.run(os.getenv("TOKEN"))

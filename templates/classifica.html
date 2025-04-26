@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Classifica Voti{% endblock %}
+
+{% block content %}
+<div class="classifica-container">
+    <h1><i class="fas fa-trophy"></i> Classifica Voti</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Voto Medio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in classifica %}
+            <tr>
+                <td>{{ entry.name }}</td>
+                <td>{{ entry.media }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">Nessun dato disponibile</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

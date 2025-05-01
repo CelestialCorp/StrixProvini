@@ -2,17 +2,20 @@
 
 **StrixProvini** è un'applicazione web sviluppata in Python con Flask, progettata per gestire le audizioni (provini) all'interno di una community, come un server Discord. Il sistema consente di raccogliere candidature, assegnare feedback e visualizzare una classifica aggiornata dei partecipanti.
 
----
-
 ## 📁 Struttura del Progetto
 
-StrixProvini/ │ ├── main.py # Script principale per l'esecuzione dell'app ├── requirements.txt # Librerie Python richieste ├── classifica.json # Dati della classifica ├── provini.json # Dati dei provini inviati ├── feedback.txt # Feedback salvati │ ├── templates/ # Template HTML (renderizzati da Flask) └── static/ # File statici (CSS, immagini, JS)
-
-yaml
-Copia
-Modifica
-
----
+```
+StrixProvini/
+│
+├── main.py              # Script principale per l'esecuzione dell'app
+├── requirements.txt     # Librerie Python richieste
+├── classifica.json      # Dati della classifica
+├── provini.json         # Dati dei provini inviati
+├── feedback.txt         # Feedback salvati
+│
+├── templates/           # Template HTML (renderizzati da Flask)
+└── static/              # File statici (CSS, immagini, JS)
+```
 
 ## ⚙️ Requisiti
 
@@ -20,46 +23,44 @@ Modifica
 - Flask
 
 Installa i requisiti con:
-
 ```bash
 pip install -r requirements.txt
-🚀 Avvio dell'Applicazione
-Clona il repository:
+```
 
-bash
-Copia
-Modifica
+## 🚀 Avvio dell'Applicazione
+
+Clona il repository:
+```bash
 git clone https://github.com/CelestialCorp/StrixProvini.git
 cd StrixProvini
+```
+
 Installa le dipendenze:
-
-bash
-Copia
-Modifica
+```bash
 pip install -r requirements.txt
+```
+
 Avvia il server Flask:
-
-bash
-Copia
-Modifica
+```bash
 python main.py
-Accedi all’interfaccia web all’indirizzo:
+```
 
-arduino
-Copia
-Modifica
+Accedi all'interfaccia web all'indirizzo:
+```
 http://localhost:5000
-✅ Funzionalità Principali
-Invio candidature per i provini
+```
 
-Visualizzazione della classifica aggiornata
+## ✅ Funzionalità Principali
 
-Gestione e salvataggio dei feedback
+- Invio candidature per i provini
+- Visualizzazione della classifica aggiornata
+- Gestione e salvataggio dei feedback
+- Interfaccia utente semplice e immediata
 
-Interfaccia utente semplice e immediata
+## 📄 Licenza
 
-📄 Licenza
 Questo progetto è distribuito sotto licenza MIT.
 
-👥 Autori
+## 👥 Autori
+
 Sviluppato da CelestialCorp – GitHub

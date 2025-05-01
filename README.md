@@ -47,7 +47,7 @@ python main.py
 
 Accedi all'interfaccia web all'indirizzo:
 ```
-http://localhost:5000
+https://strixprovini-4mjs.onrender.com
 ```
 
 ## ✅ Funzionalità Principali
@@ -63,4 +63,4 @@ Questo progetto è distribuito sotto licenza MIT.
 
 ## 👥 Autori
 
-Sviluppato da CelestialCorp – GitHub
+Sviluppato da Gatto – GitHub

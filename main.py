@@ -322,9 +322,9 @@ async def voto_media(interaction: discord.Interaction, nome_utente: str, voto_mi
     # Se tutti i voti sono corretti, calcola media e rispondi
     media = round(sum(voti) / len(voti))
     if media >= 5:
-        msg = f"✅ {nome_utente}, benvenuto ufficialmente nel team con voto: **{media}**!"
+        msg = f"{nome_utente}, benvenuto ufficialmente nel team con voto: **{media}**!"
     else:
-        msg = f"❌ {nome_utente}, non hai superato il provino (voto: **{media}**), ma fai comunque parte del team!"
+        msg = f"{nome_utente}, non hai superato il provino ma sei ufficialmente nel team con voto: **{media}**!"
 
     # Salva i dati nella classifica
     if os.path.exists('classifica.json'):
@@ -446,26 +446,86 @@ async def on_message(message):
     if message.author == bot.user:
         return
     if message.content.lower() == 'p':
-        risposta = (
-            f"Ciao {message.author.mention}! Ecco come funzionano i Provini!\n\n"
-            "Verranno valutate le seguenti abilità, ciascuna con un punteggio da 1 a 10:\n"
-            "- MIRA\n"
-            "- EDIT\n"
-            "- FREE BUILD\n\n"
-            "Successivamente, affronterete un 1v1 in due round contro ogni giudice presente, che valuterà le vostre capacità di combattimento.\n\n"
-            "Punteggio tra 7 e 8: Gioca una partita in Battaglia Reale con obiettivo 10 eliminazioni.\n"
-            "Punteggio tra 9 e 10: Gioca una partita classificata (RANKED) con obiettivo 6 eliminazioni.\n\n"
-            "Se superi la prova, la media verrà aumentata; altrimenti sarà ridotta.\n"
-            "Anche chi ottiene un punteggio inferiore a 5 farà parte del team!\n\n"
-            "Al più presto riceverai orario e data!\n"
-            "Scrivi il tuo ID di Fortnite!"
+        embed = discord.Embed(
+            title="🎯Ecco come funzionano i Provini!",
+            description=(
+                f"Ciao {message.author.mention}!\n\n"
+                "**I provini per entrare nel team STRIX si svolgeranno in due fasi:**\n\n"
+                "**⋆༺𓆩PROVE INIZIALI𓆪༻⋆**\n\n"
+                "Verranno valutate le seguenti abilità, ciascuna con un punteggio da 1 a 10:\n\n"
+                "- **🔫 MIRA**\n"
+                "- **✏️ EDIT**\n"
+                "- **🧱 FREE BUILD**\n\n"
+                "**Successivamente, affronterete un 1v1 in due round contro ogni giudice presente, che valuterà le vostre capacità di combattimento.**\n\n"
+                "**⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘**\n\n"
+                "**⋆༺𓆩PROVE FINALI𓆪༻⋆**\n\n"
+                "- **Punteggio tra 7 e 8:** Gioca una partita in Battaglia Reale con obiettivo 10 eliminazioni.\n"
+                "- **Punteggio tra 9 e 10:** Gioca una partita classificata (RANKED) con obiettivo 6 eliminazioni.\n\n"
+                "**⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘**\n\n"
+                "**⋆༺𓆩VALUTAZIONE𓆪༻⋆**\n\n"
+                "- Se superi la prova, la media verrà aumentata; altrimenti sarà ridotta.\n"
+                "- Anche chi ottiene un punteggio inferiore a 5 farà parte del team!\n\n"
+                "**⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘**\n\n"
+                "Al più presto riceverai orario e data!\n"
+                "**Scrivi il tuo ID di Fortnite!**"
+            ),
+            color=discord.Color.blue()
         )
-        await message.channel.send(risposta)
+        embed.set_image(url="https://tenor.com/view/red-banner-gif-26193040")  # Sostituisci con un URL valido per il GIF
+        await message.channel.send(embed=embed)
 
 # Avvio del bot e del server Flask
 def run_flask():
     # Avvia il server Flask
     app.run(host="0.0.0.0", port=8080)
+
+@app.route('/votazione', methods=['GET', 'POST'])
+def votazione():
+    if request.method == 'POST':
+        nome_utente = request.form['nome_utente']
+        voto_mira = int(request.form['voto_mira'])
+        voto_edit = int(request.form['voto_edit'])
+        voto_freebuild = int(request.form['voto_freebuild'])
+        voto_partita = int(request.form['voto_partita'])
+        voto_facoltativo = request.form.get('voto_facoltativo')
+
+        # Calcolo della media
+        voti = [voto_mira, voto_edit, voto_freebuild, voto_partita]
+        if voto_facoltativo:
+            voti.append(int(voto_facoltativo))
+        media = round(sum(voti) / len(voti))  # Arrotondamento alle unità
+
+        # Messaggio in base alla media
+        if media >= 5:
+            msg = f"{nome_utente}, benvenuto ufficialmente nel team con voto: **{media}**!"
+        else:
+            msg = f"{nome_utente}, non hai superato il provino ma sei ufficialmente nel team con voto: **{media}**!"
+
+        # Invio del messaggio al canale Discord
+        channel_id = 1264161415166427187
+        invia_messaggio_discord(channel_id, msg)
+
+        return f"Messaggio inviato: {msg}"
+
+    return render_template('votazione.html')
+
+def invia_messaggio_discord(channel_id, msg):
+    # Configurazione del bot Discord
+    TOKEN = os.getenv('TOKEN')
+    if not TOKEN:
+        raise ValueError("Token Discord non configurato.")
+
+    intents = discord.Intents.default()
+    bot = commands.Bot(command_prefix="!", intents=intents)
+
+    @bot.event
+    async def on_ready():
+        channel = bot.get_channel(channel_id)
+        if channel:
+            await channel.send(msg)
+        await bot.close()
+
+    bot.run(TOKEN)
 
 if __name__ == "__main__":
     # Avvia il bot Discord e il server Flask

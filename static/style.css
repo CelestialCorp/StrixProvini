@@ -398,6 +398,97 @@ textarea {
     margin: 50px auto;
 }
 
+/* Stili per la pagina di votazione */
+.votazione-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    max-width: 800px; /* Aumentata la larghezza per coerenza con altre pagine */
+    margin: 20px auto;
+    padding: 30px; /* Leggermente aumentato il padding */
+}
+
+.votazione-container h1 {
+    font-family: var(--heading-font);
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.votazione-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.votazione-container label {
+    font-weight: 500;
+    color: var(--dark-gray);
+}
+
+.votazione-container input {
+    padding: 10px;
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+.votazione-container input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.votazione-container button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.votazione-container button:hover {
+    background-color: darken(var(--primary-color), 10%);
+}
+
+/* Stili per la pagina di votazione con due blocchi */
+.votazione-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px; /* Aumentato lo spazio tra i blocchi */
+}
+
+.votazione-form, .votazione-info {
+    flex: 1.2; /* Aumentata la larghezza relativa dei blocchi */
+}
+
+.votazione-info {
+    flex: 1;
+    background-color: var(--light-gray);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.votazione-info h1, .votazione-info h2 {
+    font-family: var(--heading-font);
+    color: var(--primary-color);
+}
+
+.votazione-info ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.votazione-info li {
+    margin-bottom: 10px;
+}
+
 /* Responsività */
 @media (max-width: 900px) {
     .dashboard-layout {

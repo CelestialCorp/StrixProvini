@@ -447,13 +447,18 @@ async def on_message(message):
         return
     if message.content.lower() == 'p':
         risposta = (
-            f"Ciao {message.author.mention}!\n"
-            "Ecco come verrai valutato:\n"
-            "- **MIRA** 🔫\n"
-            "- **EDIT** ✏️\n"
-            "- **FREE BUILD** 🧱\n"
-            "- **PARTITA** 🔥\n\n"
-            "**Punteggio alto?** Potresti entrare in STRIX!"
+            f"Ciao {message.author.mention}! Ecco come funzionano i Provini!\n\n"
+            "Verranno valutate le seguenti abilità, ciascuna con un punteggio da 1 a 10:\n"
+            "- MIRA\n"
+            "- EDIT\n"
+            "- FREE BUILD\n\n"
+            "Successivamente, affronterete un 1v1 in due round contro ogni giudice presente, che valuterà le vostre capacità di combattimento.\n\n"
+            "Punteggio tra 7 e 8: Gioca una partita in Battaglia Reale con obiettivo 10 eliminazioni.\n"
+            "Punteggio tra 9 e 10: Gioca una partita classificata (RANKED) con obiettivo 6 eliminazioni.\n\n"
+            "Se superi la prova, la media verrà aumentata; altrimenti sarà ridotta.\n"
+            "Anche chi ottiene un punteggio inferiore a 5 farà parte del team!\n\n"
+            "Al più presto riceverai orario e data!\n"
+            "Scrivi il tuo ID di Fortnite!"
         )
         await message.channel.send(risposta)
 

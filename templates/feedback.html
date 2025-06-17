@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback{% endblock %}
+
+{% block content %}
+<div class="feedback-container">
+    <h1><i class="fas fa-comment"></i> Feedback</h1>
+    <form action="/submit_feedback" method="POST">
+        <textarea name="feedback" placeholder="Lascia il tuo feedback..." required></textarea>
+        <button type="submit" class="button">Invia Feedback</button>
+    </form>
+    <section class="feedback-list">
+        <h2><i class="fas fa-list"></i> Feedback Recenti</h2>
+        <ul>
+            {% for line in feedback_lines %}
+            <li>{{ line }}</li>
+            {% else %}
+            <p>Nessun feedback disponibile.</p>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+{% endblock %}

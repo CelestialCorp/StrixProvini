@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-main">
+        <!-- Container Statistiche -->
+        <div class="dashboard-container stats-container">
+            <h1>Benvenuto nella Dashboard</h1>
+            <section class="stats">
+                <h2><i class="fas fa-chart-bar"></i> Statistiche</h2>
+                <canvas id="stats-chart"></canvas>
+            </section>
+        </div>
+        
+        <!-- Container Azioni (migliorato) -->
+        <div class="dashboard-container actions-container">
+            <h2><i class="fas fa-tasks"></i> Azioni</h2>
+            
+            <div class="actions-grid">
+                <div class="action-card">
+                    <h3><i class="fas fa-user-plus"></i> Aggiungi Membro</h3>
+                    <form action="/add_member" method="POST">
+                        <div class="form-group">
+                            <label for="member_id">ID Utente o Nome</label>
+                            <input type="text" id="member_id" name="member_id" placeholder="Inserisci ID o nome..." required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="member_date">Data</label>
+                                <input type="date" id="member_date" name="member_date" required>
+                            </div>
+                            <div class="form-group half">
+                                <label for="member_time">Orario</label>
+                                <input type="time" id="member_time" name="member_time" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="button button-full"><i class="fas fa-plus-circle"></i> Aggiungi</button>
+                    </form>
+                </div>
+                
+                <div class="action-card">
+                    <h3><i class="fas fa-user-minus"></i> Rimuovi Membro</h3>
+                    <form action="/remove_member" method="POST">
+                        <div class="form-group">
+                            <label for="remove_member_id">ID Utente o Nome</label>
+                            <input type="text" id="remove_member_id" name="member_id" placeholder="Inserisci ID o nome..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="remove_reason">Motivo (opzionale)</label>
+                            <select id="remove_reason" name="remove_reason">
+                                <option value="">Seleziona un motivo</option>
+                                <option value="completato">Provino completato</option>
+                                <option value="assente">Non si è presentato</option>
+                                <option value="rinviato">Rinviato</option>
+                                <option value="altro">Altro</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="button button-danger button-full"><i class="fas fa-minus-circle"></i> Rimuovi</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-sidebar">
+        <!-- Container Membri in Attesa -->
+        <div class="dashboard-container members-container">
+            <h2><i class="fas fa-users"></i> Membri in Attesa</h2>
+            <ul class="members-list">
+                {% for member in in_attesa %}
+                <li class="member-item">
+                    <strong>Nome:</strong> {{ member.name }}<br>
+                    <strong>Data:</strong> {{ member.date or 'Non specificata' }}<br>
+                    <strong>Orario:</strong> {{ member.time or 'Non specificato' }}
+                </li>
+                {% else %}
+                <p>Nessun membro in attesa.</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('stats-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Completati', 'In Attesa'],
+            datasets: [{
+                label: 'Provini',
+                data: [10, 5],
+                backgroundColor: ['#28a745', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="votazione-container">
+    <h1 class="page-title">Pagina di Votazione</h1>
+    <div class="votazione-content">
+        <!-- Blocco sinistro: Modulo di votazione -->
+        <div class="votazione-form">
+            <h2>Compila il Modulo</h2>
+            <form method="POST" action="/votazione">
+                <div class="form-group">
+                    <label for="id">ID:</label>
+                    <input type="text" id="id" name="id" required readonly>
+                    <script>
+                        // Genera un ID casuale di 10 caratteri (numeri e lettere)
+                        function generateRandomID() {
+                            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                            let result = '';
+                            for (let i = 0; i < 10; i++) {
+                                result += characters.charAt(Math.floor(Math.random() * characters.length));
+                            }
+                            return result;
+                        }
+
+                        // Imposta l'ID generato nel campo di input
+                        document.getElementById('id').value = generateRandomID();
+                    </script>
+                </div>
+
+                <div class="form-group">
+                    <label for="nome_utente">Nome Utente:</label>
+                    <input type="text" id="nome_utente" name="nome_utente" placeholder="In questo formato <@412347780841865216>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="voto_mira">Voto Mira:</label>
+                    <input type="number" id="voto_mira" name="voto_mira" min="0" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="voto_edit">Voto Edit:</label>
+                    <input type="number" id="voto_edit" name="voto_edit" min="0" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="voto_freebuild">Voto Freebuild:</label>
+                    <input type="number" id="voto_freebuild" name="voto_freebuild" min="0" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="voto_partita">Voto Partita:</label>
+                    <input type="number" id="voto_partita" name="voto_partita" min="0" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="voto_facoltativo">Voto Facoltativo:</label>
+                    <input type="number" id="voto_facoltativo" name="voto_facoltativo" min="0" max="10">
+                </div>
+
+                <button type="submit">Invia</button>
+            </form>
+        </div>
+
+        <!-- Blocco destro: Informazioni -->
+        <div class="votazione-info">
+            <h2>Informazioni</h2>
+            <p>Benvenuto nella pagina di votazione! Qui puoi valutare i candidati in base a diversi criteri. Compila il modulo a sinistra per inviare la tua valutazione.</p>
+
+            <h3>Come funziona?</h3>
+            <p>Inserisci l'ID del candidato e assegna un punteggio per ogni categoria. I voti vanno da 0 a 10, dove 10 rappresenta il massimo punteggio possibile.</p>
+            <ul>
+                <li><strong>Voto Mira:</strong> Valuta la precisione del candidato.</li>
+                <li><strong>Voto Edit:</strong> Valuta le abilità di modifica.</li>
+                <li><strong>Voto Freebuild:</strong> Valuta la creatività e la costruzione.</li>
+                <li><strong>Voto Partita:</strong> Valuta le prestazioni in partita.</li>
+                <li><strong>Voto Facoltativo:</strong> Un voto aggiuntivo opzionale.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

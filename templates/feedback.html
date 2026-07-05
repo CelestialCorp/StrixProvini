@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback{% endblock %}
+
+{% block content %}
+<div class="feedback-container">
+    <h1><i class="fas fa-comment"></i> Feedback</h1>
+    <form action="/submit_feedback" method="POST">
+        <textarea name="feedback" placeholder="Lascia il tuo feedback..." required></textarea>
+        <button type="submit" class="button">Invia Feedback</button>
+    </form>
+    <section class="feedback-list">
+        <h2><i class="fas fa-list"></i> Feedback Recenti</h2>
+        <ul>
+            {% for entry in feedback_entries %}
+            <li style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #ddd;">
+                <div>
+                    <span class="feedback-date" style="color: #666; font-size: 13px;">{{ entry.date.strftime('%Y-%m-%d %H:%M') }}</span> - 
+                    <span class="feedback-text">{{ entry.content }}</span>
+                </div>
+                <form action="/admin/elimina-feedback/{{ entry.id }}" method="POST" style="margin: 0;">
+                    <button type="submit" class="button button-danger" style="padding: 5px 10px; font-size: 12px;" onclick="return confirm('Sei sicuro di voler eliminare questo feedback?');">
+                        <i class="fas fa-trash"></i> Elimina
+                    </button>
+                </form>
+            </li>
+            {% else %}
+            <p>Nessun feedback disponibile.</p>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+{% endblock %}

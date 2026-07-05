@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Classifica Voti{% endblock %}
+
+{% block content %}
+<div class="classifica-container">
+    <h1><i class="fas fa-trophy"></i> Classifica Voti</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Voto Medio</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in classifica %}
+            <tr>
+                <td>{{ entry.name }}</td>
+                <td>{{ entry.media }}</td>
+                <td>
+                    <form action="/admin/elimina-voto/{{ entry.id }}" method="POST" style="display:inline;">
+                        <button type="submit" class="button button-danger" style="padding: 5px 10px; font-size: 12px;" onclick="return confirm('Sei sicuro di voler eliminare questa valutazione?');">
+                            <i class="fas fa-trash"></i> Elimina
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">Nessun dato disponibile</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

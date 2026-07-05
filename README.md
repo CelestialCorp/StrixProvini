@@ -110,4 +110,4 @@ Questo progetto è distribuito sotto licenza MIT. Vedi il file `LICENSE` per mag
 
 ## 👥 Autori
 
-- ([Gatto] (https://github.com/CelestialCorp)) – Sviluppatore principale.
+- [Gatto] (https://github.com/CelestialCorp) – Sviluppatore principale.
